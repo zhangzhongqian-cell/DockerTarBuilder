@@ -41,11 +41,12 @@ jobs:
         for image in "${image_array[@]}"; do
           # Pull original image (for amd64)
           docker pull "${image}" --platform "linux/amd64"
+          
+          image_name_tag="${image##*/}"
 
           # Define your target image with the ACR path and namespace if needed
-          acr_image="${ACR_REGISTRY}/${ACR_NAMESPACE}/${image}"
-
-          # Tag and push to ACR
+          acr_image="${ACR_REGISTRY}/${ACR_NAMESPACE}/${image_name_tag}"
+          
           docker tag "${image}" "${acr_image}"
           docker push "${acr_image}"
         done
