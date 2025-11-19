@@ -34,6 +34,7 @@ jobs:
     - name: Pull, Tag and Push Docker Images
       env:
         ACR_REGISTRY: ${{ secrets.ACR_REGISTRY }}
+        ACR_NAMESPACE: ${{ secrets.ACR_NAMESPACE }}
       run: |
         images="${{ github.event.inputs.docker_images }}"
         IFS=',' read -r -a image_array <<< "$images"
