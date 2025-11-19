@@ -1,0 +1,48 @@
+name: x86-64 Pull, Retag and Push to ACR
+
+on:
+  workflow_dispatch:
+    inputs:
+      docker_images:
+        description: '请填写docker镜像名称 多个用英文逗号分开'
+        required: true
+        default: 'alpine:latest,busybox:stable-glibc'
+
+jobs:
+  pull_and_push:
+    runs-on: ubuntu-22.04
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Clean up Docker to free space
+      run: |
+          docker system prune -a -f
+          docker volume prune -f
+
+    - name: Log in to Alibaba Cloud ACR
+      env:
+        ACR_REGISTRY: ${{ secrets.ACR_REGISTRY }}          # e.g., registry.cn-hangzhou.aliyuncs.com
+        ACR_USERNAME: ${{ secrets.ACR_USERNAME }}          # 通常是你的阿里云 AccessKey ID
+        ACR_PASSWORD: ${{ secrets.ACR_PASSWORD }}          # 通常是你的阿里云 AccessKey Secret
+      run: |
+        echo "${ACR_PASSWORD}" | docker login --username "${ACR_USERNAME}" --password-stdin "${ACR_REGISTRY}"
+
+    - name: Pull, Tag and Push Docker Images
+      env:
+        ACR_REGISTRY: ${{ secrets.ACR_REGISTRY }}
+      run: |
+        images="${{ github.event.inputs.docker_images }}"
+        IFS=',' read -r -a image_array <<< "$images"
+        for image in "${image_array[@]}"; do
+          # Pull original image (for amd64)
+          docker pull "${image}" --platform "linux/amd64"
+
+          # Define your target image with the ACR path and namespace if needed
+          acr_image="${ACR_REGISTRY}/your-namespace/${image}"
+
+          # Tag and push to ACR
+          docker tag "${image}" "${acr_image}"
+          docker push "${acr_image}"
+        done
