@@ -11,6 +11,7 @@ on:
 jobs:
   pull_and_push:
     runs-on: ubuntu-22.04
+    environment: acr
 
     steps:
     - name: Checkout repository
@@ -26,6 +27,7 @@ jobs:
         ACR_REGISTRY: ${{ secrets.ACR_REGISTRY }}          # e.g., registry.cn-hangzhou.aliyuncs.com
         ACR_USERNAME: ${{ secrets.ACR_USERNAME }}          # 通常是你的阿里云 AccessKey ID
         ACR_PASSWORD: ${{ secrets.ACR_PASSWORD }}          # 通常是你的阿里云 AccessKey Secret
+        ACR_NAMESPACE: ${{ secrets.ACR_NAMESPACE }}        # e.g., your-namespace
       run: |
         echo "${ACR_PASSWORD}" | docker login --username "${ACR_USERNAME}" --password-stdin "${ACR_REGISTRY}"
 
@@ -40,7 +42,7 @@ jobs:
           docker pull "${image}" --platform "linux/amd64"
 
           # Define your target image with the ACR path and namespace if needed
-          acr_image="${ACR_REGISTRY}/your-namespace/${image}"
+          acr_image="${ACR_REGISTRY}/${ACR_NAMESPACE}/${image}"
 
           # Tag and push to ACR
           docker tag "${image}" "${acr_image}"
