@@ -11,6 +11,7 @@ on:
 jobs:
   pull_and_push:
     runs-on: ubuntu-22.04
+    environment: acr
 
     steps:
     - name: Checkout repository
