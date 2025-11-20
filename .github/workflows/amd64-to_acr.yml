@@ -6,7 +6,7 @@ on:
       docker_images:
         description: '请填写docker镜像名称 多个用英文逗号分开'
         required: true
-        default: 'alpine:latest,busybox:stable-glibc'
+        # default: 'alpine:latest,busybox:stable-glibc'
 
 jobs:
   pull_and_push:
