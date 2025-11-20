@@ -17,10 +17,10 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v4
 
-    - name: Clean up Docker to free space
-      run: |
-          docker system prune -a -f
-          docker volume prune -f
+    # - name: Clean up Docker to free space
+    #   run: |
+    #       docker system prune -a -f
+    #       docker volume prune -f
 
     - name: Login to Alibaba Cloud ACR
       env:
