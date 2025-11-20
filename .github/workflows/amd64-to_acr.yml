@@ -22,7 +22,7 @@ jobs:
           docker system prune -a -f
           docker volume prune -f
 
-    - name: Log in to Alibaba Cloud ACR
+    - name: Login to Alibaba Cloud ACR
       env:
         ACR_REGISTRY: ${{ secrets.ACR_REGISTRY }}          # e.g., registry.cn-hangzhou.aliyuncs.com
         ACR_USERNAME: ${{ secrets.ACR_USERNAME }}          # 通常是你的阿里云 AccessKey ID
