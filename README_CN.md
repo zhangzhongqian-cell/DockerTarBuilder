@@ -1,8 +1,6 @@
 # 使用本项目的方法步骤
 ## 1、fork 本项目到自己的空间
-![1](https://github.com/user-attachments/assets/8bfc9d45-76fb-4cf4-be80-19fb202e8a95)
-![2](https://github.com/user-attachments/assets/cf990b0c-a149-4f5b-9be8-d0f909f8f402)
-![3](https://github.com/user-attachments/assets/d9560061-4092-4ea2-9b8c-a580c9fdcf2d)
+
 ## 2、输入要构建的docker名称和标签
 > 如果不输入标签 则默认拉取latest标签,但请确保该镜像有latest <br>
 > 如图左侧选项代表要构建的平台。支持amd64、arm64、arm32位三种。<br>
