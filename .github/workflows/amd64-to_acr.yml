@@ -27,23 +27,26 @@ jobs:
         ACR_REGISTRY: ${{ secrets.ACR_REGISTRY }}          # e.g., registry.cn-hangzhou.aliyuncs.com
         ACR_USERNAME: ${{ secrets.ACR_USERNAME }}          # 通常是你的阿里云 AccessKey ID
         ACR_PASSWORD: ${{ secrets.ACR_PASSWORD }}          # 通常是你的阿里云 AccessKey Secret
+        ACR_NAMESPACE: ${{ secrets.ACR_NAMESPACE }}        # e.g., your-namespace
       run: |
         echo "${ACR_PASSWORD}" | docker login --username "${ACR_USERNAME}" --password-stdin "${ACR_REGISTRY}"
 
     - name: Pull, Tag and Push Docker Images
       env:
         ACR_REGISTRY: ${{ secrets.ACR_REGISTRY }}
+        ACR_NAMESPACE: ${{ secrets.ACR_NAMESPACE }}
       run: |
         images="${{ github.event.inputs.docker_images }}"
         IFS=',' read -r -a image_array <<< "$images"
         for image in "${image_array[@]}"; do
           # Pull original image (for amd64)
           docker pull "${image}" --platform "linux/amd64"
+          
+          image_name_tag="${image##*/}"
 
           # Define your target image with the ACR path and namespace if needed
-          acr_image="${ACR_REGISTRY}/your-namespace/${image}"
-
-          # Tag and push to ACR
+          acr_image="${ACR_REGISTRY}/${ACR_NAMESPACE}/${image_name_tag}"
+          
           docker tag "${image}" "${acr_image}"
           docker push "${acr_image}"
         done
