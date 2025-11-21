@@ -76,41 +76,48 @@ for ((i=1; i<=MAX_ATTEMPTS; i++)); do
   fi
 done
 
-# === Step 4: Pull from ACR with flattened name ===
-FULL_IMAGE="$IMAGE_INPUT"
-if [[ "$FULL_IMAGE" != *":"* ]]; then
-  FULL_IMAGE="${FULL_IMAGE}:latest"
-fi
+# === Step 4 & 5: Pull each image from ACR and tag back to original name ===
 
-# Flatten image name: remove any leading namespace (e.g., nginx/xxx -> xxx)
-ACR_FLATTENED_NAME=$(echo "$FULL_IMAGE" | sed 's|.*/||')
-ACR_IMAGE="$ACR_REGISTRY/$ACR_FLATTENED_NAME"
-ORIGINAL_IMAGE="$FULL_IMAGE"  # preserve original user input for tagging
+# Split input by comma into an array
+IFS=',' read -r -a IMAGE_LIST <<< "$IMAGE_INPUT"
 
-echo "📥 Pulling from ACR: $ACR_IMAGE"
-docker pull "$ACR_IMAGE"
+for ORIGINAL_IMAGE in "${IMAGE_LIST[@]}"; do
+  # Trim whitespace
+  ORIGINAL_IMAGE=$(echo "$ORIGINAL_IMAGE" | xargs)
 
-if [ $? -ne 0 ]; then
-  echo "❌ Failed to pull image from ACR!"
-  echo "Possible reasons:"
-  echo "1. ACR namespace 'docker_io_remote' is private — log in first:"
-  echo "   docker login registry.cn-beijing.aliyuncs.com"
-  echo "2. The image hasn't been pushed yet — check GitHub Actions status."
-  echo "3. Make sure your workflow flattens image names (e.g., 'nginx/xxx' → 'xxx')."
-  exit 1
-fi
+  # Add :latest if no tag
+  if [[ "$ORIGINAL_IMAGE" != *":"* ]]; then
+    FULL_IMAGE="${ORIGINAL_IMAGE}:latest"
+  else
+    FULL_IMAGE="$ORIGINAL_IMAGE"
+  fi
 
-# === Step 5: Tag back to original name ===
-echo "🏷️  Tagging as original name: $ORIGINAL_IMAGE"
-docker tag "$ACR_IMAGE" "$ORIGINAL_IMAGE"
+  # Flatten for ACR: remove any leading path (e.g., prom/node-exporter -> node-exporter)
+  ACR_FLATTENED_NAME=$(echo "$FULL_IMAGE" | sed 's|.*/||')
+  ACR_IMAGE="$ACR_REGISTRY/$ACR_FLATTENED_NAME"
 
-if [ $? -eq 0 ]; then
-  echo "✅ Successfully tagged $ACR_IMAGE as $ORIGINAL_IMAGE"
-else
-  echo "❌ Failed to tag image!"
-  exit 1
-fi
+  echo "📥 Pulling from ACR: $ACR_IMAGE"
+  docker pull "$ACR_IMAGE"
+  if [ $? -ne 0 ]; then
+    echo "❌ Failed to pull $ACR_IMAGE from ACR!"
+    echo "Make sure it was built and pushed by the workflow."
+    exit 1
+  fi
 
-# Show result
-echo "📋 Local image:"
-docker images "$ORIGINAL_IMAGE"
+  echo "🏷️  Tagging as original name: $FULL_IMAGE"
+  docker tag "$ACR_IMAGE" "$FULL_IMAGE"
+  if [ $? -ne 0 ]; then
+    echo "❌ Failed to tag $ACR_IMAGE as $FULL_IMAGE"
+    exit 1
+  fi
+
+  echo "✅ Successfully pulled and tagged: $FULL_IMAGE"
+done
+
+# Show all resulting images
+echo "📋 Local images:"
+for img in "${IMAGE_LIST[@]}"; do
+  img=$(echo "$img" | xargs)
+  if [[ "$img" != *":"* ]]; then img="$img:latest"; fi
+  docker images "$img"
+done
