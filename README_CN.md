@@ -18,3 +18,20 @@
 或 <br>
 `docker load < xxx.tar.gz`
 > 如果是Artifacts压缩文件 则需要先解压。解压后还是 `tar.gz` 无需再解压 直接load即可。
+## 4、docekr_pull_images.sh脚本说明
+### 前置条件
+- 已安装 Docker
+- 确保 Docker 服务正在运行
+- 具有足够的磁盘空间
+
+### 执行步骤
+1. 确保脚本具有执行权限：
+```bash
+chmod +x sh/docker_pull_images.sh
+```
+2. 执行脚本：
+```bash
+./sh/docker_pull_images.sh
+```
+
+
