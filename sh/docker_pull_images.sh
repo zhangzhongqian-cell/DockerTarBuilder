@@ -4,7 +4,7 @@
 GITHUB_TOKEN=${GITHUB_TOKEN:-""}
 REPO="terryWJA/DockerTarBuilder"
 WORKFLOW_FILE="amd64-to_acr.yml"
-BRANCH="master"          # 注意：你这里写的是 master，但仓库默认是 main？请确认！
+BRANCH="master"    
 ACR_REGISTRY="registry.cn-beijing.aliyuncs.com/docker_io_remote"
 MAX_WAIT_MINUTES=10
 
